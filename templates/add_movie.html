@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Movie</title>
+</head>
+<body>
+    {% if user %}
+        <h1>Add Movie for {{ user.name }}</h1>
+    {% else %}
+        <h1>Error: User not found.</h1>
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        <label for="name">Movie Name:</label>
+        <input type="text" id="name" name="name" placeholder="Enter movie name" required>
+        <p>If OMDb doesn't find the movie, fill in these details:</p>
+        <label for="director">Director:</label>
+        <input type="text" id="director" name="director" placeholder="Enter director">
+        <label for="year">Year:</label>
+        <input type="number" id="year" name="year" placeholder="Enter year">
+        <label for="rating">Rating:</label>
+        <input type="number" step="0.1" id="rating" name="rating" placeholder="Enter rating">
+        <button type="submit">Add Movie</button>
+    </form>
+</body>
+</html>

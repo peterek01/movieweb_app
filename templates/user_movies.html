@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies for {{ user.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Favorite Movies of {{ user.name }}</h1>
+
+        <a href="{{ url_for('add_movie', user_id=user.id) }}" class="button">Add New Movie</a>
+
+        <ul>
+            {% if movies %}
+                {% for movie in movies %}
+                <li>
+                    {{ movie.name }} ({{ movie.year }}) - Directed by {{ movie.director }}
+                    <a href="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}">Edit</a>
+                    <a href="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}" onclick="return confirm('Are you sure?');">Delete</a>
+                </li>
+                {% endfor %}
+            {% else %}
+                <p>No movies found for {{ user.name }}.</p>
+            {% endif %}
+        </ul>
+    </div>
+</body>
+</html>
