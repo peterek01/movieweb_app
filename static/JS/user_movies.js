@@ -1,37 +1,35 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteButtons = document.querySelectorAll(".delete-button");
+function showConfirmation(button) {
+    const movieActions = button.closest('.movie-actions');
+    const confirmBox = movieActions.querySelector('.confirm-delete');
+    const editButton = movieActions.querySelector('.button.edit');
 
-    deleteButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const movieCard = button.closest(".movie-card");
-            const details = movieCard.querySelector(".movie-details");
-            const actions = movieCard.querySelector(".movie-actions");
-            const confirmDelete = movieCard.querySelector(".confirm-delete");
+    confirmBox.style.display = 'block';
 
-            details.classList.add("hidden");
-            actions.classList.add("hidden");
-            confirmDelete.style.display = "block";
-        });
-    });
+    button.style.display = 'none';
 
-    const confirmNoButtons = document.querySelectorAll(".confirm-no");
-    confirmNoButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const movieCard = button.closest(".movie-card");
-            const details = movieCard.querySelector(".movie-details");
-            const actions = movieCard.querySelector(".movie-actions");
-            const confirmDelete = movieCard.querySelector(".confirm-delete");
+    if (editButton) {
+        editButton.disabled = true;
+    }
+}
 
-            details.classList.remove("hidden");
-            actions.classList.remove("hidden");
-            confirmDelete.style.display = "none";
-        });
-    });
+function hideConfirmation(button) {
+    const confirmBox = button.closest('.confirm-delete');
+    const movieActions = confirmBox.closest('.movie-actions');
+    const deleteButton = movieActions.querySelector('.button.danger');
+    const editButton = movieActions.querySelector('.button.edit');
 
-    const confirmYesButtons = document.querySelectorAll(".confirm-yes");
-    confirmYesButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            window.location.href = button.dataset.deleteUrl;
-        });
-    });
-});
+    confirmBox.style.display = 'none';
+
+    deleteButton.style.display = 'inline-block';
+
+    if (editButton) {
+        editButton.disabled = false;
+    }
+}
+
+function confirmDeletion(button) {
+    const movieActions = button.closest('.movie-actions');
+    const form = movieActions.querySelector('.delete-form');
+
+    form.submit();
+}

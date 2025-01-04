@@ -31,13 +31,17 @@
                     <p>Rating: {{ movie.rating }}</p>
                 </div>
                 <div class="movie-actions">
-                    <a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" class="button edit">Edit</a>
-                    <a href="#" onclick="showConfirmation({{ movie.id }})" class="button danger delete-button">Delete</a>
-                </div>
-                <div class="confirm-delete" style="display: none;">
-                    <p>Are you sure?</p>
-                    <button class="button confirm-no">NO</button>
-                    <button class="button confirm-yes" data-delete-url="{{ url_for('delete_movie', user_id=user_id, movie_id=movie.id) }}">YES</button>
+                    <form action="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" method="get" style="display:inline;">
+                        <button type="submit" class="button edit">Edit</button>
+                    </form>
+                    <form class="delete-form" action="{{ url_for('delete_movie', user_id=user_id, movie_id=movie.id) }}" method="post" style="display:inline;">
+                        <button type="button" class="button danger" onclick="showConfirmation(this)">Delete</button>
+                    </form>
+                    <div class="confirm-delete" style="display: none;">
+                        <p>Are you sure?</p>
+                        <button class="button confirm-no" onclick="hideConfirmation(this)">NO</button>
+                        <button class="button confirm-yes" onclick="confirmDeletion(this)">YES</button>
+                    </div>
                 </div>
             </div>
             {% endfor %}

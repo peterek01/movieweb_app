@@ -27,7 +27,10 @@ class SQLiteDataManager(DataManagerInterface):
         return Movie.query.filter_by(user_id=user_id).all()
 
     def get_user_movie_by_name(self, user_id, movie_name):
-        return Movie.query.filter_by(user_id=user_id, name=movie_name).first()
+        print(f"Checking if movie '{movie_name}' exists for user ID {user_id}")
+        movie = Movie.query.filter_by(user_id=user_id, name=movie_name).first()
+        print(f"Found movie: {movie}")
+        return movie
 
     def add_movie(self, user_id, movie_details):
         # Remove 'user_id' from movie_details if it exists
@@ -150,7 +153,7 @@ class SQLiteDataManager(DataManagerInterface):
                     "name": data.get("Title"),
                     "director": data.get("Director"),
                     "year": year,
-                    "rating": float(data.get("imdbRating")) if data.get("imdbRating") else None,
+                    "rating": float(data.get("imdbRating")) if data.get("imdbRating") and data.get("imdbRating") != "N/A" else None,
                     "poster_url": data.get("Poster") if data.get("Poster") != "N/A" else None,
                 }
         return None

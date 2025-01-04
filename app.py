@@ -7,10 +7,14 @@ import os
 
 app = Flask(__name__)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "data/movies.db")}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_mapping(
+    SQLALCHEMY_DATABASE_URI=f'sqlite:///{os.path.join(BASE_DIR, "data/movies.db")}',
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+)
 db.init_app(app)
 data_manager = SQLiteDataManager(db)  # We pass the db instance
+
+print(f"SQLAlchemy URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 
 @app.route('/')
@@ -124,10 +128,18 @@ def update_movie(user_id, movie_id):
     return render_template('update_movie.html', movie=movie, user_id=user_id)
 
 
-@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>')
+@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['POST'])
 def delete_movie(user_id, movie_id):
-    data_manager.delete_movie(movie_id)
-    return redirect(url_for('user_movies', user_id=user_id))
+    movie = data_manager.get_movie(movie_id)
+    if not movie:
+        return jsonify({'success': False, 'error': 'Movie not found'}), 404
+
+    try:
+        data_manager.delete_movie(movie_id)
+        return redirect(url_for('user_movies', user_id=user_id))
+    except Exception as e:
+        print(f"Error deleting movie: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])

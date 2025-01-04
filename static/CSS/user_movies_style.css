@@ -296,4 +296,9 @@ body {
     background-color: #e53935;
 }
 
-
+.button.edit:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
