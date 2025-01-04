@@ -1,0 +1,299 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(145deg, #2c3e50, #34495e);
+    color: #f9f9f9;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+    overflow: hidden;
+}
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .left-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar .right-section {
+    margin-left: auto;
+}
+
+.navbar .user-list-button {
+    color: #f9f9f9;
+    text-decoration: none;
+    padding: 5px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #333;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar .user-list-button:hover {
+    background-color: #333;
+    color: white;
+}
+
+.navbar .add-movie-button, .navbar .home-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: #f9f9f9;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-left: 15px;
+    transition: background-color 0.3s;
+}
+
+.navbar .add-movie-button:hover, .navbar .home-button:hover {
+    background-color: #45a049;
+}
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    box-sizing: border-box;
+    box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.3);
+    height: 100%;
+}
+
+.movie-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.movie-card {
+    background: linear-gradient(135deg, #3a6073, #16222a);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 350px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5);
+}
+
+.movie-poster img {
+    width: 100%;
+    border-radius: 10px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.movie-details h3 {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #f9f9f9;
+}
+
+.movie-details p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: dcdcdc;
+}
+
+.movie-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.movie-actions .button {
+    display: inline-block;
+    background-color: #4CAF50;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.movie-actions .button.danger {
+    background-color: #f44336;
+}
+
+.movie-actions .button.danger:hover {
+    background-color: #e53935;
+}
+
+.movie-actions .button:hover {
+    background-color: #45a049;
+}
+
+.delete-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    text-align: center;
+    width: 300px;
+    font-size: 16px;
+}
+
+.delete-popup p {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.delete-popup button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-popup .confirm-delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-popup .confirm-delete:hover {
+    background-color: #e53935;
+}
+
+.delete-popup .cancel-delete {
+    background-color: #ddd;
+    color: #333;
+}
+
+.delete-popup .cancel-delete:hover {
+    background-color: #ccc;
+}
+
+.movie-actions .button {
+    display: inline-block;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.movie-actions .button.edit {
+    background-color: #4CAF50;
+}
+
+.movie-actions .button.edit:hover {
+    background-color: #45a049;
+}
+
+.movie-actions .button.danger {
+    background-color: #f44336;
+}
+
+.movie-actions .button.danger:hover {
+    background-color: #e53935;
+}
+
+.confirm-delete {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    z-index: 10;
+    width: 90%;
+    max-width: 180px;
+}
+
+.confirm-delete p {
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.confirm-delete .button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+.confirm-delete .button.confirm-yes {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.confirm-delete .button.confirm-yes:hover {
+    background-color: #45a049;
+}
+
+.confirm-delete .button.confirm-no {
+    background-color: #f44336;
+    color: white;
+}
+
+.confirm-delete .button.confirm-no:hover {
+    background-color: #e53935;
+}
+
+

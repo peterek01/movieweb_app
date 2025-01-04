@@ -3,17 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users - MovieWeb App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='users_style.css') }}">
+    <title>User List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/users_style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Users</h1>
-        <ul>
+    <div class="overlay">
+        <a href="{{ url_for('home') }}" class="home-button">Home</a>
+        <div class="user-grid">
             {% for user in users %}
-            <li><a href="{{ url_for('user_movies', user_id=user.id) }}">{{ user.name }}</a></li>
+            <div class="user-card" id="user-card-{{ user.id }}">
+                <img src="{{ url_for('static', filename='images/avatars/avatar_' + user.avatar|string + '.png') }}" alt="{{ user.name }}" class="user-avatar">
+                <a href="{{ url_for('user_movies', user_id=user.id) }}" class="user-link">{{ user.name }}</a>
+                <button class="delete-button" onclick="showConfirmation({{ user.id }})" title="Delete User">&times;</button>
+
+                <div id="confirmation-modal-{{ user.id }}" class="confirmation-modal" style="display: none;">
+                    <div class="modal-content">
+                        <p>Are you sure?</p>
+                        <div class="confirmation-buttons">
+                            <button onclick="confirmDelete({{ user.id }})" class="confirm-button">Yes</button>
+                            <button onclick="closeConfirmation({{ user.id }})" class="cancel-button">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
-        </ul>
-    </div>>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{{ url_for('static', filename='JS/users.js') }}"></script>
+    </div>
 </body>
 </html>

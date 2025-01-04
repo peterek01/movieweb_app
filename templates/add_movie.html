@@ -4,28 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Movie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/add_movie_style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    {% if user %}
+    <div class="form-container">
+        <div class="navbar">
+            <a href="{{ url_for('user_movies', user_id=user_id) }}" class="back-arrow">Back</a>
+        </div>
         <h1>Add Movie for {{ user.name }}</h1>
-    {% else %}
-        <h1>Error: User not found.</h1>
-    {% endif %}
-
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="post" onsubmit="return validateForm()">
+            <label for="name">Movie Name:</label>
+            <div style="position: relative;">
+                <input type="text" id="name" name="name" placeholder="Enter movie name" required autocomplete="off">
+                <ul id="suggestions" class="suggestions-list"></ul>
+            </div>
+            <p>If OMDb doesn't find the movie, fill in these details:</p>
+            <label for="director">Director:</label>
+            <input type="text" id="director" name="director" placeholder="Enter director">
+            <label for="year">Year:</label>
+            <input type="number" id="year" name="year" placeholder="Enter year">
+            <label for="rating">Rating:</label>
+            <input type="number" step="0.1" id="rating" name="rating" placeholder="Enter rating">
+            <button type="submit">Add Movie</button>
+        </form>
+    </div>
     {% if error %}
-        <p style="color: red;">{{ error }}</p>
+    <div class="error-modal" id="error-modal">
+        <div class="error-content">
+            <p>{{ error }}</p>
+            <button onclick="closeErrorModal()" class="ok-button">OK</button>
+        </div>
+    </div>
     {% endif %}
-    <form method="post">
-        <label for="name">Movie Name:</label>
-        <input type="text" id="name" name="name" placeholder="Enter movie name" required>
-        <p>If OMDb doesn't find the movie, fill in these details:</p>
-        <label for="director">Director:</label>
-        <input type="text" id="director" name="director" placeholder="Enter director">
-        <label for="year">Year:</label>
-        <input type="number" id="year" name="year" placeholder="Enter year">
-        <label for="rating">Rating:</label>
-        <input type="number" step="0.1" id="rating" name="rating" placeholder="Enter rating">
-        <button type="submit">Add Movie</button>
-    </form>
+    <div id="duplicate-movie-modal" class="delete-popup" style="display: none;">
+        <p>This movie is already in your collection</p>
+        <button class="confirm-yes" onclick="closeDuplicateModal()">OK</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='JS/add_movie.js') }}"></script>
 </body>
 </html>

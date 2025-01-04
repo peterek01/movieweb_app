@@ -1,6 +1,5 @@
 import os
 import requests
-from requests import JSONDecodeError
 from sqlalchemy.exc import OperationalError, IntegrityError
 from .data_manager_interface import DataManagerInterface
 from .models import User, Movie
@@ -21,24 +20,33 @@ class SQLiteDataManager(DataManagerInterface):
     def get_user(self, user_id):
         return User.query.get(user_id)
 
+    def get_movie(self, movie_id):
+        return Movie.query.get(movie_id)
+
     def get_user_movies(self, user_id):
         return Movie.query.filter_by(user_id=user_id).all()
 
-    def add_movie(self, user_id, movie_details):
-        if not movie_details.get("name"):
-            raise ValueError("Movie name is required.")
+    def get_user_movie_by_name(self, user_id, movie_name):
+        return Movie.query.filter_by(user_id=user_id, name=movie_name).first()
 
-        # if 'user_id' in movie_details:
-        #     del movie_details['user_id']
+    def add_movie(self, user_id, movie_details):
+        # Remove 'user_id' from movie_details if it exists
+        if 'user_id' in movie_details:
+            del movie_details['user_id']
 
         try:
+            # Create new movie object
             new_movie = Movie(user_id=user_id, **movie_details)
             self.db.session.add(new_movie)
             self.db.session.commit()
         except IntegrityError as e:
             self.db.session.rollback()
             print("Integrity error occurred:", e)
-            raise ValueError("A movie with this name already exists.")
+            raise ValueError("Movie already exists in the database.")
+        except Exception as e:
+            self.db.session.rollback()
+            print("An error occurred while adding the movie:", e)
+            raise ValueError("Error adding movie to the database.")
 
     def update_movie(self, movie_id, movie_details):
         # Download movie from database
@@ -77,8 +85,9 @@ class SQLiteDataManager(DataManagerInterface):
         try:
             if not user_details.get('name', '').strip():
                 raise ValueError("User name cannot be empty.")
-            # Check if the required key 'name' exists in the dictionary
-            new_user = User(name=user_details['name'])
+
+            avatar = user_details.get('avatar', '1')
+            new_user = User(name=user_details['name'], avatar=avatar)
 
             # Create a new user and add it to the database
             self.db.session.add(new_user)
@@ -108,38 +117,43 @@ class SQLiteDataManager(DataManagerInterface):
         self.db.session.commit()
 
     def delete_user(self, user_id):
-        user = User.query.get(user_id)
-        if user:
+        try:
+            user = User.query.get(user_id)
+            if not user:
+                raise ValueError(f"User with ID {user_id} not found.")
+
             self.db.session.delete(user)
             self.db.session.commit()
-        else:
-            raise ValueError("User not found")
+        except Exception as e:
+            # Undo operation in case of error
+            self.db.session.rollback()
+            print(f"Error deleting user: {e}")
+            raise ValueError(f"Error deleting user: {str(e)}")
 
     def fetch_movie_details_from_omdb(self, movie_name):
         api_key = "2e8cb9fe"
         url = f"http://www.omdbapi.com/?t={movie_name}&apikey={api_key}"
         response = requests.get(url)
         if response.status_code == 200:
-            try:
-                data = response.json()
-                if data.get("Response") == "True":
-                    return {
-                        "name": data.get("Title"),
-                        "director": data.get("Director"),
-                        "year": int(data.get("Year")) if data.get("Year") else None,
-                        "rating": float(data.get("imdbRating")) if data.get("imdbRating") else None,
-                    }
-                else:
-                    return None
-            except JSONDecodeError as e:
-                # When working with API and processing responses in JSON format
-                print("Error decoding JSON response:", e)
-                raise ValueError("Invalid JSON response from OMDb API.")
-            except Exception as e:
-                print("General error fetching data from OMDb:", e)
-                raise
-        else:
-            raise Exception("Error fetching data from OMDb API")
+            data = response.json()
+            if data.get("Response") == "True":
+                # Year range support
+                year = data.get("Year")
+                if year and '–' in year:
+                    year = year.split('–')[0].strip()  # Select the first year from the range
+                try:
+                    year = int(year) if year else None
+                except ValueError:
+                    year = None  # If conversion fails, set to None
+
+                return {
+                    "name": data.get("Title"),
+                    "director": data.get("Director"),
+                    "year": year,
+                    "rating": float(data.get("imdbRating")) if data.get("imdbRating") else None,
+                    "poster_url": data.get("Poster") if data.get("Poster") != "N/A" else None,
+                }
+        return None
 
     def initialize_database(self):
         db_path = 'data/movies.db'

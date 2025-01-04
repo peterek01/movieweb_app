@@ -3,17 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New User</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='add_user_style.css') }}">
+    <title>Add User</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/add_user_style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Add New User</h1>
-        <form action="{{ url_for('add_user') }}" method="post">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <button type="submit">Add User</button>
-        </form>
+    <div class="overlay">
+        <a href="{{ url_for('home') }}" class="back-arrow">Home</a>
+        <div class="content">
+            <h1>Add a New User</h1>
+            <form method="post" class="form" action="{{ url_for('add_user') }}">
+                <input type="hidden" name="avatar" id="hidden-avatar" value="1">
+
+                <div class="avatar-preview" id="avatar-preview">
+                    <img src="{{ url_for('static', filename='images/avatars/avatar_1.png') }}" alt="Default Avatar" id="selected-avatar-img">
+                </div>
+
+                <div class="avatar-selection">
+                    <button type="button" class="add-avatar-button" onclick="openAvatarModal()">+</button>
+                    <p>Select an avatar</p>
+                </div>
+
+                <div id="avatar-modal" class="avatar-modal" style="display: none;">
+                    <div class="modal-content">
+                        <h2>Choose an Avatar</h2>
+                        <div class="avatar-options">
+                            <img src="{{ url_for('static', filename='images/avatars/avatar_1.png') }}" class="avatar-option" onclick="selectAvatar(1)">
+                            <img src="{{ url_for('static', filename='images/avatars/avatar_2.png') }}" class="avatar-option" onclick="selectAvatar(2)">
+                            <img src="{{ url_for('static', filename='images/avatars/avatar_3.png') }}" class="avatar-option" onclick="selectAvatar(3)">
+                            <img src="{{ url_for('static', filename='images/avatars/avatar_4.png') }}" class="avatar-option" onclick="selectAvatar(4)">
+                        </div>
+                        <button type="button" onclick="closeAvatarModal()" class="close-modal-button">Close</button>
+                    </div>
+                </div>
+
+                <input type="text" name="name" placeholder="Enter user name" required>
+                <button type="submit" class="btn">Add User</button>
+            </form>
+        </div>
     </div>
+    <script src="{{ url_for('static', filename='JS/add_user.js') }}"></script>
 </body>
 </html>

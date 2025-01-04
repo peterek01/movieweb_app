@@ -3,28 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movies for {{ user.name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>User Movies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/user_movies_style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Favorite Movies of {{ user.name }}</h1>
-
-        <a href="{{ url_for('add_movie', user_id=user.id) }}" class="button">Add New Movie</a>
-
-        <ul>
-            {% if movies %}
-                {% for movie in movies %}
-                <li>
-                    {{ movie.name }} ({{ movie.year }}) - Directed by {{ movie.director }}
-                    <a href="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}">Edit</a>
-                    <a href="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}" onclick="return confirm('Are you sure?');">Delete</a>
-                </li>
-                {% endfor %}
-            {% else %}
-                <p>No movies found for {{ user.name }}.</p>
-            {% endif %}
-        </ul>
+    <div class="navbar">
+        <div class="left-section">
+            <h1>Movies for {{ user.name }}</h1>
+            <a href="{{ url_for('list_users') }}" class="user-list-button">User List</a>
+        </div>
+        <div class="right-section">
+            <a href="{{ url_for('add_movie', user_id=user.id) }}" class="add-movie-button">+ Add New Movie</a>
+            <a href="{{ url_for('home') }}" class="home-button">Home</a>
+        </div>
     </div>
+    <div class="container">
+        <div class="movie-grid">
+            {% for movie in movies %}
+            <div class="movie-card" data-movie-id="{{ movie.id }}">
+                <div class="movie-poster">
+                    <img src="{{ movie.poster_url or url_for('static', filename='images/default-poster.jpg') }}" alt="{{ movie.name }}">
+                </div>
+                <div class="movie-details">
+                    <h3>{{ movie.name }}</h3>
+                    <p>Directed by {{ movie.director }}</p>
+                    <p>Year: {{ movie.year }}</p>
+                    <p>Rating: {{ movie.rating }}</p>
+                </div>
+                <div class="movie-actions">
+                    <a href="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" class="button edit">Edit</a>
+                    <a href="#" onclick="showConfirmation({{ movie.id }})" class="button danger delete-button">Delete</a>
+                </div>
+                <div class="confirm-delete" style="display: none;">
+                    <p>Are you sure?</p>
+                    <button class="button confirm-no">NO</button>
+                    <button class="button confirm-yes" data-delete-url="{{ url_for('delete_movie', user_id=user_id, movie_id=movie.id) }}">YES</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='JS/user_movies.js') }}"></script>
 </body>
 </html>

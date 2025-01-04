@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail List of Users</title>
+    <title>List of Users</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='list_users_style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Detailed Users List</h1>
+        <h1>List of Users</h1>
         <ul>
             {% for user in users %}
-            <li>{{ user.name }} - {{ user.email }} ({{ user.role }})</li>
+            <li>
+                <a href="{{ url_for('user_movies', user_id=user.id) }}">{{ user.name }}</a>
+            </li>
             {% endfor %}
         </ul>
     </div>
