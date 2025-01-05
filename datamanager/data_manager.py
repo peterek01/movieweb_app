@@ -21,7 +21,7 @@ class SQLiteDataManager(DataManagerInterface):
         return User.query.get(user_id)
 
     def get_movie(self, movie_id):
-        return Movie.query.get(movie_id)
+        return Movie.query.filter_by(id=movie_id).first()
 
     def get_user_movies(self, user_id):
         return Movie.query.filter_by(user_id=user_id).all()
@@ -153,8 +153,11 @@ class SQLiteDataManager(DataManagerInterface):
                     "name": data.get("Title"),
                     "director": data.get("Director"),
                     "year": year,
-                    "rating": float(data.get("imdbRating")) if data.get("imdbRating") and data.get("imdbRating") != "N/A" else None,
+                    "rating": float(data.get("imdbRating")) if data.get("imdbRating") and data.get(
+                        "imdbRating") != "N/A" else None,
                     "poster_url": data.get("Poster") if data.get("Poster") != "N/A" else None,
+                    "description": data.get("Plot", "No description available."),
+                    "cast": data.get("Actors", "No cast information available.")
                 }
         return None
 

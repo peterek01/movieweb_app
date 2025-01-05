@@ -3,6 +3,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from datamanager.data_manager import SQLiteDataManager
 from datamanager.models import db
 from flask import jsonify
+from flask_migrate import Migrate
 import os
 
 app = Flask(__name__)
@@ -12,6 +13,7 @@ app.config.from_mapping(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 db.init_app(app)
+migrate = Migrate(app, db)
 data_manager = SQLiteDataManager(db)  # We pass the db instance
 
 print(f"SQLAlchemy URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
@@ -183,6 +185,39 @@ def search_movies():
             return jsonify([movie['Title'] for movie in data.get('Search', [])])
 
     return jsonify([])  # Return empty list if no matches
+
+
+@app.route('/movies/<int:movie_id>/details', methods=['GET'])
+def get_movie_details(movie_id):
+    movie = data_manager.get_movie(movie_id)
+    if not movie:
+        return jsonify({'error': 'Movie not found'}), 404
+
+    # If the data is already in the database, return it
+    if movie.description and movie.cast:
+        return jsonify({
+            'title': movie.name,
+            'description': movie.description,
+            'cast': movie.cast,
+            'poster_url': movie.poster_url
+        })
+
+    # If data is missing, please download it from OMDb API
+    omdb_data = data_manager.fetch_movie_details_from_omdb(movie.name)
+    if not omdb_data:
+        return jsonify({'error': 'Unable to fetch movie details from OMDb API'}), 500
+
+    # Database update with new data
+    movie.description = omdb_data.get('description', 'No description available.')
+    movie.cast = omdb_data.get('cast', 'No cast information available.')
+    db.session.commit()
+
+    return jsonify({
+        'title': movie.name,
+        'description': movie.description,
+        'cast': movie.cast,
+        'poster_url': movie.poster_url
+    })
 
 
 @app.errorhandler(400)

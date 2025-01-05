@@ -21,7 +21,7 @@
         <div class="movie-grid">
             {% for movie in movies %}
             <div class="movie-card" data-movie-id="{{ movie.id }}">
-                <div class="movie-poster">
+                <div class="movie-poster" data-movie-id="{{ movie.id }}" onclick="openModal({{ movie.id }}, this)">
                     <img src="{{ movie.poster_url or url_for('static', filename='images/default-poster.jpg') }}" alt="{{ movie.name }}">
                 </div>
                 <div class="movie-details">
@@ -45,6 +45,16 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </div>
+    <div id="movie-details-modal" class="modal">
+        <button class="close-button" onclick="closeModal()">&times;</button>
+        <div class="modal-content">
+            <img id="modal-poster" src="" alt="Movie Poster">
+            <h2 id="modal-title">Title Placeholder</h2>
+            <p id="modal-description">Description Placeholder</p>
+            <h4>Cast:</h4>
+            <p id="modal-cast">Cast Placeholder</p>
         </div>
     </div>
     <script src="{{ url_for('static', filename='JS/user_movies.js') }}"></script>

@@ -8,6 +8,8 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     avatar = db.Column(db.String(15), nullable=False, default='1')
 
+    movies = db.relationship('Movie', back_populates='user', cascade="all, delete-orphan")
+
     def __repr__(self):
         return f"<User(id={self.id}, name={self.name})>"
 
@@ -19,7 +21,11 @@ class Movie(db.Model):
     year = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    poster_url = db.Column(db.String(300), nullable=True)
+    poster_url = db.Column(db.String(500), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    cast = db.Column(db.Text, nullable=True)
+
+    user = db.relationship('User', back_populates='movies')
 
     # representation method for better debugging
     def __repr__(self):
