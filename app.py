@@ -1,37 +1,47 @@
+"""
+Flask web application for managing users and movies.
+Uses SQLite, SQLAlchemy, and Flask-Migrate for database management.
+Integrates with OMDb API to fetch movie details.
+"""
+
+import os
 import requests
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask_migrate import Migrate
 from datamanager.data_manager import SQLiteDataManager
 from datamanager.models import db
-from flask import jsonify
-from flask_migrate import Migrate
-import os
 
 app = Flask(__name__)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 app.config.from_mapping(
     SQLALCHEMY_DATABASE_URI=f'sqlite:///{os.path.join(BASE_DIR, "data/movies.db")}',
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
+
 db.init_app(app)
 migrate = Migrate(app, db)
-data_manager = SQLiteDataManager(db)  # We pass the db instance
+data_manager = SQLiteDataManager(db)
 
 print(f"SQLAlchemy URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 
 @app.route('/')
 def home():
+    """Render the homepage."""
     return render_template('home.html')
 
 
 @app.route('/users')
 def list_users():
+    """Retrieve and display all users."""
     users = data_manager.get_all_users()
     return render_template('users.html', users=users)
 
 
 @app.route('/users/<int:user_id>')
 def user_movies(user_id):
+    """Display movies for a specific user."""
     user = data_manager.get_user(user_id)
     if not user:
         return render_template('404.html'), 404
@@ -42,6 +52,7 @@ def user_movies(user_id):
 
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
+    """Add a new user to the database."""
     if request.method == 'POST':
         user_details = {
             'name': request.form['name'],
@@ -54,14 +65,15 @@ def add_user():
 
 @app.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
 def add_movie(user_id):
+    """Allow a user to add a movie to their collection."""
     user = data_manager.get_user(user_id)
     if not user:
-        return render_template('404.html'), 404  # Error handling when user does not exist
+        return render_template('404.html'), 404
 
     if request.method == 'POST':
         movie_name = request.form['name']
-        # Check if the video already exists in the user's database
         existing_movie = data_manager.get_user_movie_by_name(user_id, movie_name)
+
         if existing_movie:
             return render_template(
                 'add_movie.html',
@@ -88,7 +100,6 @@ def add_movie(user_id):
                     error="Invalid input data"
                 )
 
-        # Add a movie to the database
         movie_details['user_id'] = user_id
         data_manager.add_movie(user_id, movie_details)
         return redirect(url_for('user_movies', user_id=user_id))
@@ -98,11 +109,11 @@ def add_movie(user_id):
 
 @app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
-    # Download movie details
+    """Update details of a movie owned by a user."""
     movie = data_manager.get_movie(movie_id)
 
     if not movie:
-        return "Movie not found", 404  # Handling the case where the movie doesn't exist
+        return "Movie not found", 404
 
     if request.method == 'POST':
         try:
@@ -113,9 +124,11 @@ def update_movie(user_id, movie_id):
                 "year": int(request.form['year']),
                 "rating": float(request.form['rating']),
             }
+
             # Update movie in database
             data_manager.update_movie(movie_id, movie_details)
             return redirect(url_for('user_movies', user_id=user_id))
+
         except ValueError as e:
             # Handling invalid input data
             print("Invalid input:", e)
@@ -132,6 +145,7 @@ def update_movie(user_id, movie_id):
 
 @app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['POST'])
 def delete_movie(user_id, movie_id):
+    """Delete a movie from a user's collection."""
     movie = data_manager.get_movie(movie_id)
     if not movie:
         return jsonify({'success': False, 'error': 'Movie not found'}), 404
@@ -146,13 +160,12 @@ def delete_movie(user_id, movie_id):
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):
+    """Delete a user and their associated movies."""
     try:
-        # Checking if user exists
         user = data_manager.get_user(user_id)
         if not user:
             return jsonify({'success': False, 'error': 'User not found'}), 404
 
-        # Deleting a user
         data_manager.delete_user(user_id)
         return jsonify({'success': True}), 200
 
@@ -169,9 +182,11 @@ def delete_user(user_id):
 
 @app.route('/search_movies', methods=['GET'])
 def search_movies():
+    """Search for movies in the OMDb API."""
     query = request.args.get('q', '').strip()
     if not query:
-        return jsonify([])  # Return an empty list if no query
+        # Return an empty list if no query
+        return jsonify([])
 
     OMDB_API_KEY = "2e8cb9fe"
     url = f"http://www.omdbapi.com/?s={query}&apikey={OMDB_API_KEY}"
@@ -179,16 +194,15 @@ def search_movies():
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        if data.get("Response") == "True":
-            # Extract movie titles from the response
-            movie_titles = [movie.get("Title", "Unknown") for movie in data.get("Search", [])]
-            return jsonify([movie['Title'] for movie in data.get('Search', [])])
+        return jsonify([movie.get("Title", "Unknown") for movie in data.get("Search", [])])
 
-    return jsonify([])  # Return empty list if no matches
+    # Return empty list if no matches
+    return jsonify([])
 
 
 @app.route('/movies/<int:movie_id>/details', methods=['GET'])
 def get_movie_details(movie_id):
+    """Retrieve detailed movie information from database or OMDb API."""
     movie = data_manager.get_movie(movie_id)
     if not movie:
         return jsonify({'error': 'Movie not found'}), 404
@@ -221,22 +235,26 @@ def get_movie_details(movie_id):
 
 
 @app.errorhandler(400)
-def bad_request(e):
+def bad_request():
+    """Handle 400 Bad Request errors."""
     return render_template('400.html'), 400
 
 
 @app.errorhandler(403)
-def forbidden(e):
+def forbidden():
+    """Handle 403 Forbidden errors."""
     return render_template('403.html'), 403
 
 
 @app.errorhandler(404)
-def page_not_found(e):
+def page_not_found():
+    """Handle 404 Not Found errors."""
     return render_template('404.html'), 404
 
 
 @app.errorhandler(500)
-def internal_server_error(e):
+def internal_server_error():
+    """Handle 500 Internal Server errors."""
     return render_template('500.html'), 500
 
 
